@@ -1,4 +1,16 @@
-# OpenCoder
+<p align="center">
+    <h1 align="center">
+        <img src="https://github.com/user-attachments/assets/93406728-e93f-4a90-9edc-adc346dedbf3"
+         alt="Logo" width="65"
+        height="65" style="vertical-align: middle;">
+        OpenCoder
+    </h1>
+     <p align="center">⚡ The Cookbook for Top-Tier Open CodeLLM ⚡</p>
+</p>
+
+<!-- 👉 HomePage -->
+
+![12](https://github.com/user-attachments/assets/3aa8dd8f-b12a-46e7-a543-d81cfd175d30)
 
 ## Introduction
 
@@ -68,3 +80,7 @@ If you find our work helpful, feel free to give us a cite :-)
   url={https://arxiv.org/pdf/2411.04905}
 }
 ```
+
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=OpenCoder-llm/OpenCoder-llm&type=Date)](https://star-history.com/#OpenCoder-llm/OpenCoder-llm&Date)

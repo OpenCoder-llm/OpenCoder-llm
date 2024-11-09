@@ -1,8 +1,13 @@
+<div align="center">
+  <img src="https://github.com/OpenCoder-llm/opencoder-llm.github.io/blob/main/static/images/opencoder_icon.jpg?raw=true" width="30%" alt="OpenCoder-Icon" />
+</div>
+
+
 <p align="center">
     <h1 align="center">
-        <img src="https://github.com/user-attachments/assets/93406728-e93f-4a90-9edc-adc346dedbf3"
+<!--         <img src="https://github.com/user-attachments/assets/93406728-e93f-4a90-9edc-adc346dedbf3"
          alt="Logo" width="65"
-        height="65" style="vertical-align: middle;">
+        height="65" style="vertical-align: middle;"> -->
         OpenCoder
     </h1>
      <p align="center">⚡ The Open Cookbook for Top-Tier Code Large Language Models ⚡</p>

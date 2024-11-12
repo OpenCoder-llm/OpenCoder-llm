@@ -20,9 +20,10 @@
 ![12](https://github.com/user-attachments/assets/3aa8dd8f-b12a-46e7-a543-d81cfd175d30)
 
 ## News
+- 🔥🔥 ```2024/11/12``` We have released our efficient CodeLLM evaluation framework: [OpenCodeEval](https://github.com/OpenCoder-llm/OpenCoder-llm/tree/main/OpenCodeEval).
 - 🔥🔥 ```2024/11/12``` We have released high-quality annealing data 📊 [opc-annealing-corpus](https://huggingface.co/datasets/OpenCoder-LLM/opc-annealing-corpus), which includes algorithmic-corpus along with corresponding synthetic data.
-- 🔥🔥 ```2024/11/11``` We have released 55B of recalled pages from [Fineweb](https://huggingface.co/datasets/HuggingFaceFW/fineweb), including 📊 [fineweb-code-corpus](https://huggingface.co/datasets/OpenCoder-LLM/fineweb-code-corpus) and 📊 [fineweb-math-corpus](https://huggingface.co/datasets/OpenCoder-LLM/fineweb-math-corpus).
-- 🔥🔥 ```2024/11/09``` We have released 4.5M Post-training data: 📊 [Dataset](https://huggingface.co/collections/OpenCoder-LLM/opencoder-datasets-672e6db6a0fed24bd69ef1c2).
+- 🔥 ```2024/11/11``` We have released 55B of recalled pages from [Fineweb](https://huggingface.co/datasets/HuggingFaceFW/fineweb), including 📊 [fineweb-code-corpus](https://huggingface.co/datasets/OpenCoder-LLM/fineweb-code-corpus) and 📊 [fineweb-math-corpus](https://huggingface.co/datasets/OpenCoder-LLM/fineweb-math-corpus).
+- 🔥 ```2024/11/09``` We have released 4.5M Post-training data: 📊 [Dataset](https://huggingface.co/collections/OpenCoder-LLM/opencoder-datasets-672e6db6a0fed24bd69ef1c2).
 - 🔥 ```2024/11/08``` We have released our models! Please download them from 🤗 [Model](https://huggingface.co/collections/infly/opencoder-672cec44bbb86c39910fb55e).
 - 🔥 ```2024/11/07``` We have released our paper on Arxiv: 📄 [OpenCoder: The Open Cookbook for Top-Tier Code Large Language Models](https://arxiv.org/abs/2411.04905).
 
@@ -32,6 +33,7 @@
 - [ ] Intermedidate Checkpoints
 - [ ] **RefineCode**: Metadata of raw code data 
 - [ ] **RefineCode**: Code-related web data
+- [x] CodeLLM evaluation framework: OpenCodeEval
 - [x] High-quality annealing data
 - [x] Post-training data
 - [x] Final model weights
@@ -52,36 +54,42 @@ We are working hard to release all those resources! 💪
 
 ## Models
 
-|         Model         | Sequence Length |                                Download                                 |
+<!-- |         Model         | Sequence Length |                                Download                                 |
 |:---------------------:|:---------------:|:-----------------------------------------------------------------------:|
 | OpenCoder-1.5B-Base  |      4K       | 🤗 [HuggingFace](https://huggingface.co/infly/OpenCoder-1.5B-Base)  |
 | OpenCoder-8B-Base  |      8K       | 🤗 [HuggingFace](https://huggingface.co/infly/OpenCoder-8B-Base)  |
 | OpenCoder-1.5B-Instruct  |      4K       | 🤗 [HuggingFace](https://huggingface.co/infly/OpenCoder-1.5B-Instruct) |
-| OpenCoder-8B-Instruct  |      8K       | 🤗 [HuggingFace](https://huggingface.co/infly/OpenCoder-8B-Instruct) |
+| OpenCoder-8B-Instruct  |      8K       | 🤗 [HuggingFace](https://huggingface.co/infly/OpenCoder-8B-Instruct) | -->
+
+|         Model         | Sequence Length |                   HuggingFace                 |      wisemodel    |        
+|:---------------------:|:---------------:|:-----------------------------------------------------------------------:|:------------------------------------------|
+| OpenCoder-1.5B-Base  |      4K       | [🤗HuggingFace](https://huggingface.co/infly/OpenCoder-1.5B-Base)  |  [<img src="https://github.com/OpenCoder-llm/opencoder-llm.github.io/blob/main/static/images/wisemodel_logo.png?raw=true" height="12">](https://wisemodel.cn/models/OpenCoder/OpenCoder-1.5B-Base) |
+| OpenCoder-8B-Base  |      8K       | [🤗HuggingFace](https://huggingface.co/infly/OpenCoder-8B-Base)  | [<img src="https://github.com/OpenCoder-llm/opencoder-llm.github.io/blob/main/static/images/wisemodel_logo.png?raw=true" height="12">](https://wisemodel.cn/models/OpenCoder/OpenCoder-8B-Base) |
+| OpenCoder-1.5B-Instruct  |      4K       | [🤗HuggingFace](https://huggingface.co/infly/OpenCoder-1.5B-Instruct) | [<img src="https://github.com/OpenCoder-llm/opencoder-llm.github.io/blob/main/static/images/wisemodel_logo.png?raw=true" height="12">](https://wisemodel.cn/models/OpenCoder/OpenCoder-1.5B-Instruct) |
+| OpenCoder-8B-Instruct  |      8K       | [🤗HuggingFace](https://huggingface.co/infly/OpenCoder-8B-Instruct) | [<img src="https://github.com/OpenCoder-llm/opencoder-llm.github.io/blob/main/static/images/wisemodel_logo.png?raw=true" height="12">](https://wisemodel.cn/models/OpenCoder/OpenCoder-8B-Instruct) |
+
 
 ## Datasets
 
 ### Pre-training
 |         Dataset       | Size |                                Download                                 |
 |:---------------------:|:---------------:|:-----------------------------------------------------------------------:|
-| fineweb-code-corpus  |      148 GB       | 🤗 [HuggingFace](https://huggingface.co/datasets/OpenCoder-LLM/fineweb-code-corpus)  |
-| fineweb-math-corpus  |       10 GB    | 🤗 [HuggingFace](https://huggingface.co/datasets/OpenCoder-LLM/fineweb-math-corpus)  |
+| fineweb-code-corpus  |      148 GB       | [🤗HuggingFace](https://huggingface.co/datasets/OpenCoder-LLM/fineweb-code-corpus)  |
+| fineweb-math-corpus  |       10 GB    | [🤗HuggingFace](https://huggingface.co/datasets/OpenCoder-LLM/fineweb-math-corpus)  |
+| opc-annealing-corpus  |      24 GB    | [🤗HuggingFace](https://huggingface.co/datasets/OpenCoder-LLM/opc-annealing-corpus)  |
 
 
 ### Post-training
 
 |         Dataset       | Num |                                Download                                 |
 |:---------------------:|:---------------:|:-----------------------------------------------------------------------:|
-| opencoder-sft-stage1  |      4.21 M       | 🤗 [HuggingFace](https://huggingface.co/datasets/OpenCoder-LLM/opencoder-sft-stage1)  |
-| opencoder-sft-stage2  |      375 K      | 🤗 [HuggingFace](https://huggingface.co/datasets/OpenCoder-LLM/opencoder-sft-stage2)  |
+| opc-sft-stage1  |      4.21 M       | [🤗HuggingFace](https://huggingface.co/datasets/OpenCoder-LLM/opc-sft-stage1)  |
+| opc-sft-stage2  |      375 K      | [🤗HuggingFace](https://huggingface.co/datasets/OpenCoder-LLM/opc-sft-stage2)  |
 
 
 **This is not the end; we are organizing the remaining data and uploading it progressively.**
 
 ## Performance
-
-<!-- ![benchmark_base](https://github.com/user-attachments/assets/7f5a49b2-9539-4185-91fa-fd32c1315b2a) -->
-<!-- ![benchmark_instruct](https://github.com/user-attachments/assets/81c6e686-0ed0-4eb5-8fb8-a651750ec346) -->
 <img src="https://github.com/user-attachments/assets/7f5a49b2-9539-4185-91fa-fd32c1315b2a" width="75%">
 <img src="https://github.com/user-attachments/assets/81c6e686-0ed0-4eb5-8fb8-a651750ec346" width="75%">
 

@@ -20,8 +20,9 @@
 ![12](https://github.com/user-attachments/assets/3aa8dd8f-b12a-46e7-a543-d81cfd175d30)
 
 ## News
-- 🔥🔥 ```2024/11/12``` We have released our efficient CodeLLM evaluation framework: [OpenCodeEval](https://github.com/OpenCoder-llm/OpenCoder-llm/tree/main/OpenCodeEval).
-- 🔥🔥 ```2024/11/12``` We have released high-quality annealing data 📊 [opc-annealing-corpus](https://huggingface.co/datasets/OpenCoder-LLM/opc-annealing-corpus), which includes algorithmic-corpus along with corresponding synthetic data.
+- 🔥🔥 ```2024/11/15``` We have released meta data of **RefineCode** 📊 [RefineCode-code-corpus-meta](https://huggingface.co/datasets/OpenCoder-LLM/RefineCode-raw-code-meta). You can collect your own **RefineCode** referring to this dataset!
+- 🔥 ```2024/11/12``` We have released our efficient CodeLLM evaluation framework: [OpenCodeEval](https://github.com/OpenCoder-llm/OpenCoder-llm/tree/main/OpenCodeEval).
+- 🔥 ```2024/11/12``` We have released high-quality annealing data 📊 [opc-annealing-corpus](https://huggingface.co/datasets/OpenCoder-LLM/opc-annealing-corpus), which includes algorithmic-corpus along with corresponding synthetic data.
 - 🔥 ```2024/11/11``` We have released 55B of recalled pages from [Fineweb](https://huggingface.co/datasets/HuggingFaceFW/fineweb), including 📊 [fineweb-code-corpus](https://huggingface.co/datasets/OpenCoder-LLM/fineweb-code-corpus) and 📊 [fineweb-math-corpus](https://huggingface.co/datasets/OpenCoder-LLM/fineweb-math-corpus).
 - 🔥 ```2024/11/09``` We have released 4.5M Post-training data: 📊 [Dataset](https://huggingface.co/collections/OpenCoder-LLM/opencoder-datasets-672e6db6a0fed24bd69ef1c2).
 - 🔥 ```2024/11/08``` We have released our models! Please download them from 🤗 [Model](https://huggingface.co/collections/infly/opencoder-672cec44bbb86c39910fb55e).

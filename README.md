@@ -32,7 +32,7 @@
 ## Releases
 - [ ] Data cleaning pipeline
 - [ ] Intermedidate Checkpoints
-- [ ] **RefineCode**: Metadata of raw code data 
+- [ ] **RefineCode**: Metadata of raw code data
 - [ ] **RefineCode**: Code-related web data
 - [x] CodeLLM evaluation framework: OpenCodeEval
 - [x] High-quality annealing data
@@ -40,12 +40,12 @@
 - [x] Final model weights
 - [x] Paper
 
-We are working hard to release all those resources! 💪 
+We are working hard to release all those resources! 💪
 
 
 ## Introduction
 
-**OpenCoder** is an open and reproducible code LLM family which includes 1.5B and 8B base and chat models, supporting both English and Chinese languages. Starting from scratch, OpenCoder is pretrained on 2.5 trillion tokens composed of 90% raw code and 10% code-related web data, and supervised finetuned on over 4.5M high-quality SFT examples, finally reaching the performance of top-tier code LLMs. We provide not only model weights and inference code, but also the reproducible training data, the complete data processing pipeline, rigorous experimental ablation results, and detailed training protocols. Empowering researchers to build and innovate, OpenCoder is your open foundation for advancing code AI. 
+**OpenCoder** is an open and reproducible code LLM family which includes 1.5B and 8B base and chat models, supporting both English and Chinese languages. Starting from scratch, OpenCoder is pretrained on 2.5 trillion tokens composed of 90% raw code and 10% code-related web data, and supervised finetuned on over 4.5M high-quality SFT examples, finally reaching the performance of top-tier code LLMs. We provide not only model weights and inference code, but also the reproducible training data, the complete data processing pipeline, rigorous experimental ablation results, and detailed training protocols. Empowering researchers to build and innovate, OpenCoder is your open foundation for advancing code AI.
 
 - **Complete Open Source**: OpenCoder ensures full transparency by releasing not only the model weights and forthcoming inference code but also the complete data-cleaning code for training. This release includes high-quality synthetic data, an extensive set of checkpoints, and a dataset of over 4.5 million supervised fine-tuning (SFT) entries, making OpenCoder one of the most comprehensively open-sourced models available.
 - **Comprehensive Experimental Analysis**: OpenCoder is rigorously tested through extensive ablation studies on various data-cleaning strategies and training processes, including file-level and repository-level deduplication experiments, ensuring thorough exploration and validation of the model’s performance.
@@ -62,7 +62,7 @@ We are working hard to release all those resources! 💪
 | OpenCoder-1.5B-Instruct  |      4K       | 🤗 [HuggingFace](https://huggingface.co/infly/OpenCoder-1.5B-Instruct) |
 | OpenCoder-8B-Instruct  |      8K       | 🤗 [HuggingFace](https://huggingface.co/infly/OpenCoder-8B-Instruct) | -->
 
-|         Model         | Sequence Length |                   HuggingFace                 |      wisemodel    |        
+|         Model         | Sequence Length |                   HuggingFace                 |      wisemodel    |
 |:---------------------:|:---------------:|:-----------------------------------------------------------------------:|:------------------------------------------|
 | OpenCoder-1.5B-Base  |      4K       | [🤗HuggingFace](https://huggingface.co/infly/OpenCoder-1.5B-Base)  |  [<img src="https://github.com/OpenCoder-llm/opencoder-llm.github.io/blob/main/static/images/wisemodel_logo.png?raw=true" height="12">](https://wisemodel.cn/models/OpenCoder/OpenCoder-1.5B-Base) |
 | OpenCoder-8B-Base  |      8K       | [🤗HuggingFace](https://huggingface.co/infly/OpenCoder-8B-Base)  | [<img src="https://github.com/OpenCoder-llm/opencoder-llm.github.io/blob/main/static/images/wisemodel_logo.png?raw=true" height="12">](https://wisemodel.cn/models/OpenCoder/OpenCoder-8B-Base) |

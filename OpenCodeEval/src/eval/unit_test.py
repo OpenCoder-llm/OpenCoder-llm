@@ -20,23 +20,24 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
+import contextlib
+import faulthandler
 import io
+import multiprocessing
 import os
+import platform
+import signal
+import subprocess
 import sys
+import tempfile
 import time
 import types
 import unittest
-import contextlib
-import faulthandler
-import platform
-import signal
-import tempfile
-import subprocess
-import multiprocessing
+from multiprocessing import Manager, Value
+from typing import Tuple
+
 import numpy as np
 
-from multiprocessing import Array, Value, Manager
-from typing import Any, Dict, List, Tuple, Union
 
 @contextlib.contextmanager
 def swallow_subprocess_output():
@@ -45,23 +46,23 @@ def swallow_subprocess_output():
     original_run = subprocess.run
 
     def _popen_patch(*args, **kwargs):
-        if 'capture_output' in kwargs and kwargs['capture_output']:
+        if "capture_output" in kwargs and kwargs["capture_output"]:
             # Avoid setting stdout or stderr if capture_output is True
-            kwargs.pop('stdout', None)
-            kwargs.pop('stderr', None)
+            kwargs.pop("stdout", None)
+            kwargs.pop("stderr", None)
         else:
-            kwargs.setdefault('stdout', subprocess.PIPE)
-            kwargs.setdefault('stderr', subprocess.PIPE)
+            kwargs.setdefault("stdout", subprocess.PIPE)
+            kwargs.setdefault("stderr", subprocess.PIPE)
         return original_popen(*args, **kwargs)
 
     def _run_patch(*args, **kwargs):
-        if 'capture_output' in kwargs and kwargs['capture_output']:
+        if "capture_output" in kwargs and kwargs["capture_output"]:
             # Avoid setting stdout or stderr if capture_output is True
-            kwargs.pop('stdout', None)
-            kwargs.pop('stderr', None)
+            kwargs.pop("stdout", None)
+            kwargs.pop("stderr", None)
         else:
-            kwargs.setdefault('stdout', subprocess.PIPE)
-            kwargs.setdefault('stderr', subprocess.PIPE)
+            kwargs.setdefault("stdout", subprocess.PIPE)
+            kwargs.setdefault("stderr", subprocess.PIPE)
         return original_run(*args, **kwargs)
 
     subprocess.Popen = _popen_patch
@@ -71,6 +72,7 @@ def swallow_subprocess_output():
     finally:
         subprocess.Popen = original_popen
         subprocess.run = original_run
+
 
 @contextlib.contextmanager
 def swallow_io():
@@ -139,7 +141,7 @@ def safe_environment():
 
     def safe_kill(pid, sig):
         try:
-            pgid = os.getpgid(pid)
+            os.getpgid(pid)
             if pid == current_pid or pid in child_pids:
                 original_kill(pid, sig)
             else:
@@ -155,32 +157,32 @@ def safe_environment():
 
     def safe_system(command):
         print(f"Intercepted system command: {command}")
-        if 'kill' in command or 'killall' in command:
+        if "kill" in command or "killall" in command:
             return 0  # Simulate successful execution without doing anything
         return original_system(command)
 
     def safe_subprocess_call(command, *args, **kwargs):
         print(f"Intercepted subprocess call: {command}")
-        if 'kill' in command or 'killall' in command:
+        if "kill" in command or "killall" in command:
             return 0  # Simulate successful execution without doing anything
         return original_subprocess_call(command, *args, **kwargs)
 
     def safe_subprocess_check_output(command, *args, **kwargs):
         print(f"Intercepted command: {command}")
-        if 'ps' in command:
+        if "ps" in command:
             return b""  # Simulate no processes found
         return original_subprocess_check_output(command, *args, **kwargs)
 
     def safe_subprocess_run(*args, **kwargs):
         print(f"Intercepted subprocess run command: {args}")
-        if 'kill' in args[0] or 'killall' in args[0]:
-            return subprocess.CompletedProcess(args, 0, b'', b'')  # Simulate successful execution
+        if "kill" in args[0] or "killall" in args[0]:
+            return subprocess.CompletedProcess(args, 0, b"", b"")  # Simulate successful execution
         return original_subprocess_run(*args, **kwargs)
 
     class SafePopen(subprocess.Popen):
         def __init__(self, *args, **kwargs):
             print(f"Intercepted Popen command: {args}")
-            kwargs['preexec_fn'] = os.setsid  # Start the process in a new session
+            kwargs["preexec_fn"] = os.setsid  # Start the process in a new session
             super().__init__(*args, **kwargs)
             child_pids.append(self.pid)
 
@@ -201,8 +203,8 @@ def safe_environment():
 
     def safe_os_popen(command):
         print(f"Intercepted os.popen command: {command}")
-        if 'kill' in command or 'killall' in command:
-            return os.popen('echo Intercepted')
+        if "kill" in command or "killall" in command:
+            return os.popen("echo Intercepted")
         return original_os_popen(command)
 
     def safe_exec(*args, **kwargs):
@@ -239,7 +241,7 @@ def safe_environment():
                 pass
             except Exception as e:
                 print(f"Error handling process {pid}: {e}")
-        
+
         os.kill = original_kill
         os.killpg = original_killpg
         os.system = original_system
@@ -290,35 +292,28 @@ def reliability_guard(max_as_limit, max_data_limit, max_stack_limit):
     Codex paper for more information about OpenAI's code sandbox, and proceed
     with caution.
     """
-    
+
     import os
     import time
-    from datetime import datetime
 
-    os.environ['TZ'] = 'UTC'
+    os.environ["TZ"] = "UTC"
     time.tzset()
-    
+
     os.environ["OMP_NUM_THREADS"] = "1"
-    os.environ['TF_CPP_MIN_LOG_LEVEL'] = "3" 
-    os.environ['TF_ENABLE_ONEDNN_OPTS'] = "0"
-    
+    os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
+    os.environ["TF_ENABLE_ONEDNN_OPTS"] = "0"
+
     if max_as_limit and max_data_limit and max_stack_limit:
         import resource
-        
+
         max_as_limit = max_as_limit * 1024 * 1024
         max_data_limit = max_data_limit * 1024 * 1024
         max_stack_limit = max_stack_limit * 1024 * 1024
-        
-        resource.setrlimit(
-            resource.RLIMIT_AS, (max_as_limit, max_as_limit)
-        )
-        resource.setrlimit(
-            resource.RLIMIT_DATA, (max_data_limit, max_data_limit)
-        )
+
+        resource.setrlimit(resource.RLIMIT_AS, (max_as_limit, max_as_limit))
+        resource.setrlimit(resource.RLIMIT_DATA, (max_data_limit, max_data_limit))
         if not platform.uname().system == "Darwin":
-            resource.setrlimit(
-                resource.RLIMIT_STACK, (max_stack_limit, max_stack_limit)
-            )
+            resource.setrlimit(resource.RLIMIT_STACK, (max_stack_limit, max_stack_limit))
 
     faulthandler.disable()
 
@@ -328,7 +323,8 @@ def reliability_guard(max_as_limit, max_data_limit, max_stack_limit):
     builtins.quit = None
 
     import matplotlib.pyplot as plt
-    plt.close('all')
+
+    plt.close("all")
 
 
 PASS = "pass"
@@ -352,42 +348,44 @@ def unsafe_execute(
 ):
     with safe_environment(), create_tempdir():
         # These system calls are needed when cleaning up tempdir.
+        import builtins
         import os
         import shutil
-        import builtins
-        
+
         rmtree = shutil.rmtree
         rmdir = os.rmdir
         chdir = os.chdir
         # Disable functionalities that can make destructive changes to the test.
-        reliability_guard(max_as_limit = 30720, max_data_limit = 30720, max_stack_limit = 10)
+        reliability_guard(max_as_limit=30720, max_data_limit=30720, max_stack_limit=10)
         module_name = "__test__"
         new_module = types.ModuleType(module_name)
         # Set necessary attributes for the module
-        new_module.__dict__.update({
-            '__builtins__': builtins,
-            '__file__': f"{module_name}.py",
-            '__package__': None,
-            '__doc__': None,
-            'sys': sys,
-            'os': os,
-            'environ': os.environ,
-        })
+        new_module.__dict__.update(
+            {
+                "__builtins__": builtins,
+                "__file__": f"{module_name}.py",
+                "__package__": None,
+                "__doc__": None,
+                "sys": sys,
+                "os": os,
+                "environ": os.environ,
+            }
+        )
 
         try:
             full_code = code + "\n" + test_code
 
             with swallow_io():
-                exec(compile(full_code, f"{module_name}.py", 'exec'), new_module.__dict__)
+                exec(compile(full_code, f"{module_name}.py", "exec"), new_module.__dict__)
                 sys.modules[module_name] = new_module
-                TestCases = getattr(new_module, 'TestCases')
+                TestCases = getattr(new_module, "TestCases")
                 loader = unittest.TestLoader()
                 suite = loader.loadTestsFromTestCase(TestCases)
                 test_result = unittest.TestResult()
 
                 with time_limit(timeout):
                     suite.run(test_result)
-            
+
             issues = test_result.failures + test_result.errors
             for test, trace in issues:
                 details[test.id().split(".")[-1]] = trace
@@ -402,6 +400,7 @@ def unsafe_execute(
 
 
 import psutil
+
 
 def terminate_process_tree(pid):
     try:
@@ -418,6 +417,7 @@ def terminate_process_tree(pid):
     except psutil.NoSuchProcess:
         pass
 
+
 def check_correctness(
     task_id: int,
     solution_id: int,
@@ -426,11 +426,8 @@ def check_correctness(
     timeout: float,
 ) -> Tuple[str, np.ndarray]:
 
-    result = {
-        "task_id": task_id,
-        "solution_id": solution_id
-    }
-    
+    result = {"task_id": task_id, "solution_id": solution_id}
+
     # shared memory objects
     stat = Value("i", _UNKNOWN)
     manager = Manager()
@@ -448,7 +445,7 @@ def check_correctness(
     )
 
     p.start()
-    p.join(timeout=timeout+1)
+    p.join(timeout=timeout + 1)
 
     if p.is_alive():
         terminate_process_tree(p.pid)
@@ -456,7 +453,7 @@ def check_correctness(
 
     stat = _mapping[stat.value]
     details = dict(details)
-    
+
     if not stat:
         stat = TIMEOUT
     if stat == PASS:

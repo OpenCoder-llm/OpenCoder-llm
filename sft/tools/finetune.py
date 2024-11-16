@@ -1,29 +1,28 @@
 import copy
 import random
 from dataclasses import dataclass, field
-from typing import Optional, Dict, Sequence
+from typing import Dict, Optional, Sequence
 
 import torch
 import torch.distributed
 import transformers
-from transformers import Trainer
 from datasets import load_dataset
-import os
-
+from transformers import Trainer
 
 IGNORE_INDEX = -100
 EOT_TOKEN = "<|im_end|>"
 
+
 def build_instruction_prompt(instruction: str, tokenizer):
-    messages = [
-        {"role": "user", "content": instruction}
-    ]
+    messages = [{"role": "user", "content": instruction}]
     model_inputs = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
     return model_inputs
+
 
 @dataclass
 class ModelArguments:
     model_name_or_path: Optional[str] = field(default="deepseek-ai/deepseek-coder-6.7b-instruct")
+
 
 @dataclass
 class DataArguments:
@@ -38,6 +37,7 @@ class TrainingArguments(transformers.TrainingArguments):
         default=512,
         metadata={"help": "Maximum sequence length. Sequences will be right padded (and possibly truncated)."},
     )
+
 
 def safe_save_model_for_hf_trainer(trainer: transformers.Trainer, output_dir: str):
     """Collects the state dict and dump to disk."""
@@ -89,9 +89,11 @@ def preprocess(
         label[:source_len] = IGNORE_INDEX
     return dict(input_ids=input_ids, labels=labels)
 
+
 @dataclass
 class DataCollatorForSupervisedDataset(object):
     """Collate examples for supervised fine-tuning."""
+
     tokenizer: transformers.PreTrainedTokenizer
 
     def __call__(self, instances: Sequence[Dict]) -> Dict[str, torch.Tensor]:
@@ -102,38 +104,37 @@ class DataCollatorForSupervisedDataset(object):
         )
         labels = [torch.tensor(x) for x in labels]
         labels = torch.nn.utils.rnn.pad_sequence(labels, batch_first=True, padding_value=IGNORE_INDEX)
-        
+
         return dict(
             input_ids=input_ids,
             labels=labels,
             attention_mask=input_ids.ne(self.tokenizer.pad_token_id),
         )
 
+
 def train_tokenize_function(examples, tokenizer):
-    sources = [
-        build_instruction_prompt(instruction, tokenizer)
-        for instruction in examples['instruction']
-    ]
-    targets = [f"{output}\n{EOT_TOKEN}" for output in examples['output']]
+    sources = [build_instruction_prompt(instruction, tokenizer) for instruction in examples["instruction"]]
+    targets = [f"{output}\n{EOT_TOKEN}" for output in examples["output"]]
     data_dict = preprocess(sources, targets, tokenizer)
     return data_dict
+
 
 def train():
     parser = transformers.HfArgumentParser((ModelArguments, DataArguments, TrainingArguments))
     model_args, data_args, training_args = parser.parse_args_into_dataclasses()
-    
+
     if training_args.local_rank == 0:
-        print('='*100)
+        print("=" * 100)
         print(training_args)
-    
+
     tokenizer = transformers.AutoTokenizer.from_pretrained(
         model_args.model_name_or_path,
         model_max_length=training_args.model_max_length,
         padding_side="right",
         use_fast=True,
-        trust_remote_code=True
+        trust_remote_code=True,
     )
-    
+
     print("PAD Token:", tokenizer.pad_token, tokenizer.pad_token_id)
     print("BOS Token", tokenizer.bos_token, tokenizer.bos_token_id)
     print("EOS Token", tokenizer.eos_token, tokenizer.eos_token_id)
@@ -141,49 +142,48 @@ def train():
     if training_args.local_rank == 0:
         print("Load tokenizer from {} over.".format(model_args.model_name_or_path))
 
-    model = transformers.AutoModelForCausalLM.from_pretrained(
-        model_args.model_name_or_path,
-        torch_dtype=torch.bfloat16
-    )
+    model = transformers.AutoModelForCausalLM.from_pretrained(model_args.model_name_or_path, torch_dtype=torch.bfloat16)
 
     if training_args.local_rank == 0:
         print("Load model from {} over.".format(model_args.model_name_or_path))
-    
-    if data_args.data_path.endswith('.json'):
-        print(f"[INFO] here is json path")
+
+    if data_args.data_path.endswith(".json"):
+        print("[INFO] here is json path")
         raw_train_datasets = load_dataset(
-            'json',
-            data_files=data_args.data_path,
-            split="train",
-            cache_dir=training_args.cache_dir
+            "json", data_files=data_args.data_path, split="train", cache_dir=training_args.cache_dir
         )
     else:
-        print(f"[INFO] here is datasets path")
+        print("[INFO] here is datasets path")
         from datasets import load_from_disk
+
         raw_train_datasets = load_from_disk(data_args.data_path)
 
-    if training_args.local_rank > 0: 
+    if training_args.local_rank > 0:
         torch.distributed.barrier()
-    
-    print(f"[INFO] start tokenize", flush=True)
+
+    print("[INFO] start tokenize", flush=True)
     train_dataset = raw_train_datasets.map(
         train_tokenize_function,
         batched=True,
         batch_size=3000,
         num_proc=100,
         remove_columns=raw_train_datasets.column_names,
-        load_from_cache_file=True, # not args.overwrite_cache
+        load_from_cache_file=True,  # not args.overwrite_cache
         desc="Running Encoding",
-        fn_kwargs={ "tokenizer": tokenizer }
+        fn_kwargs={"tokenizer": tokenizer},
     )
 
     if training_args.local_rank == 0:
         torch.distributed.barrier()
-    
+
     if training_args.local_rank == 0:
         print("Training dataset samples:", len(train_dataset))
         for index in random.sample(range(len(train_dataset)), 3):
-            print(f"Sample {index} of the training set: {train_dataset[index]['input_ids']}, {train_dataset[index]['labels']}.")
+            print(
+                f"Sample {index} of the training set: "
+                f"{train_dataset[index]['input_ids']}, "
+                f"{train_dataset[index]['labels']}."
+            )
             print(f"Sample {index} of the training set: {tokenizer.decode(list(train_dataset[index]['input_ids']))}.")
 
     data_collator = DataCollatorForSupervisedDataset(tokenizer=tokenizer)

@@ -7,9 +7,10 @@ sys.path.extend([os.path.dirname(ROOT), os.path.dirname(os.path.dirname(ROOT))])
 from typing import List
 
 from benchmark.base import Benchmark
-from sanitize import sanitize
 from eval.execution import check_correctness
+from sanitize import sanitize
 from utils import refine_text, stream_jsonl
+
 
 class MBPP(Benchmark):
 
@@ -22,35 +23,31 @@ class MBPP(Benchmark):
     test_start = 10
     test_end = 510
 
-    def __init__(self,
-                 name:str = "MBPP",
-                 timeout:float = 3.0,
-                 prompt_type:str = "Instruction"): 
+    def __init__(self, name: str = "MBPP", timeout: float = 3.0, prompt_type: str = "Instruction"):
         super().__init__()
-        
+
         self.name = name
         self.timeout = timeout
         self.prompt_type = prompt_type
 
         self.tasks = self.get_task()
-    
+
     def get_task(self):
         """
         Get the task data from the jsonl file into a dictionary.
         """
 
         tasks = {}
-        
+
         for task_data in stream_jsonl(filename=self.path):
             task_id = int(task_data["task_id"])
 
-            task_data['text'] = refine_text(task_data['text'])
-            
+            task_data["text"] = refine_text(task_data["text"])
+
             tasks[task_id] = task_data
-        
+
         return tasks
 
-    
     def fewshot_examples(self):
 
         few_shots = []
@@ -58,14 +55,10 @@ class MBPP(Benchmark):
         for task_id, task_data in self.tasks.items():
             if task_id >= self.few_shots_start and task_id < self.few_shots_end:
                 few_shots.append(task_data)
-        
+
         return few_shots
-    
-    def format_prompt(self,
-                      promblem: str,
-                      tests: List[str],
-                      code: str = None
-                    ) -> str:
+
+    def format_prompt(self, promblem: str, tests: List[str], code: str = None) -> str:
         promblem = f"You are an expert Python programmer, and here is your task:\n{promblem}"
         test = "\n".join(tests)
         test = f"Your code should pass these tests:\n{test}\n"
@@ -77,15 +70,15 @@ class MBPP(Benchmark):
         else:
             prompt = prompt + "\n```python\n"
         return prompt
-    
+
     def get_few_shots_prompts(self):
-        
+
         few_shots_prompts = []
         for few_shot in self.fewshot_examples():
             few_shots_prompts.append(self.format_prompt(few_shot["text"], few_shot["test_list"], few_shot["code"]))
 
-        return '\n'.join(few_shots_prompts)
-    
+        return "\n".join(few_shots_prompts)
+
     def get_prompt(self):
         """
         Builds the prompt for the LM to generate from.
@@ -98,11 +91,8 @@ class MBPP(Benchmark):
 
         for task_id, task_data in self.tasks.items():
             if task_id >= self.test_start and task_id < self.test_end:
-                prompt = few_shots_prompts + '\n' + self.format_prompt(task_data["text"], task_data["test_list"])
-                prompts.append({
-                    'task_id': task_id,
-                    'prompt': prompt
-                })
+                prompt = few_shots_prompts + "\n" + self.format_prompt(task_data["text"], task_data["test_list"])
+                prompts.append({"task_id": task_id, "prompt": prompt})
 
         return prompts
 
@@ -112,28 +102,28 @@ class MBPP(Benchmark):
         """
 
         return dict(
-            task_id = generation['task_id'],
-            completion_id = generation['completion_id'],
-            solution = sanitize(generation['completion'])
+            task_id=generation["task_id"],
+            completion_id=generation["completion_id"],
+            solution=sanitize(generation["completion"]),
         )
-    
+
     def process_results(self, solution):
         """
         Takes the list of LM generations and evaluates them against the test cases
         """
 
-        task_data = self.tasks[solution['task_id']]
+        task_data = self.tasks[solution["task_id"]]
 
-        code =  (
-                    "\n".join(self.imports) + "\n"
-                    + task_data['test_setup_code'] + "\n"
-                    + solution['solution'] + "\n"
-                    + "\n".join(task_data['test_list'])
-                )
-        
-        result = check_correctness(solution['task_id'],
-                                   solution['completion_id'],
-                                   code,
-                                   self.timeout)
-        
+        code = (
+            "\n".join(self.imports)
+            + "\n"
+            + task_data["test_setup_code"]
+            + "\n"
+            + solution["solution"]
+            + "\n"
+            + "\n".join(task_data["test_list"])
+        )
+
+        result = check_correctness(solution["task_id"], solution["completion_id"], code, self.timeout)
+
         return result

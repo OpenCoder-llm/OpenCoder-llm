@@ -6,6 +6,7 @@ sys.path.extend([os.path.dirname(ROOT), os.path.dirname(os.path.dirname(ROOT))])
 
 from abc import ABC, abstractmethod
 
+
 class Generator(ABC):
 
     model_name: str = None
@@ -21,7 +22,6 @@ class Generator(ABC):
 
     def fewshot_examples(self):
         """Loads and returns the few-shot examples for the task if they exist."""
-        pass
 
     @abstractmethod
     def generate(self):
@@ -29,4 +29,3 @@ class Generator(ABC):
         :param doc: dict[str: str]
             sample from the test dataset
         """
-        pass

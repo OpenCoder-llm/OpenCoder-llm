@@ -2,20 +2,18 @@
 
 import os
 import sys
-import pathlib
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 sys.path.extend([os.path.dirname(ROOT), os.path.dirname(os.path.dirname(ROOT))])
 
 import ast
 import traceback
-
 from typing import Dict, List, Optional, Set, Tuple
 
-from utils import refine_text, python_extract
+from utils import refine_text
 
 
-def syntax_check(code, verbose = False):
+def syntax_check(code, verbose=False):
     try:
         ast.parse(code)
         return True
@@ -23,6 +21,7 @@ def syntax_check(code, verbose = False):
         if verbose:
             traceback.print_exc()
         return False
+
 
 def extract_longest_valid_code(text: str) -> str:
     lines = text.splitlines()
@@ -34,14 +33,15 @@ def extract_longest_valid_code(text: str) -> str:
 
     for i in range(len(lines)):
         for j in range(i, len(lines)):
-            current_snippet = "\n".join(lines[i:j+1])
+            current_snippet = "\n".join(lines[i : j + 1])
             if syntax_check(current_snippet):
-                valid_line_count = sum(1 for line in lines[i:j+1] if line.strip())
+                valid_line_count = sum(1 for line in lines[i : j + 1] if line.strip())
                 if valid_line_count > max_valid_lines:
                     max_valid_lines = valid_line_count
                     max_valid_snippet = current_snippet
 
     return max_valid_snippet
+
 
 def get_deps(nodes: List[Tuple[str, ast.AST]]) -> Dict[str, Set[str]]:
     name2deps = {}
@@ -60,6 +60,7 @@ def get_deps(nodes: List[Tuple[str, ast.AST]]) -> Dict[str, Set[str]]:
         name2deps[name] = deps
     return name2deps
 
+
 def get_function_dependency(entrypoint: str, call_graph: Dict[str, Set[str]]) -> Set[str]:
     visited = set()
     to_visit = [entrypoint]
@@ -72,6 +73,7 @@ def get_function_dependency(entrypoint: str, call_graph: Dict[str, Set[str]]) ->
 
     return visited
 
+
 def get_definition_name(node: ast.AST) -> Optional[str]:
     if isinstance(node, (ast.FunctionDef, ast.ClassDef)):
         return node.name
@@ -81,8 +83,10 @@ def get_definition_name(node: ast.AST) -> Optional[str]:
             return targets[0].id
     return None
 
+
 def has_return_statement(node: ast.AST) -> bool:
     return any(isinstance(n, ast.Return) for n in ast.walk(node))
+
 
 def sanitize(text: str, entrypoint: Optional[str] = None) -> str:
 
@@ -92,7 +96,7 @@ def sanitize(text: str, entrypoint: Optional[str] = None) -> str:
 
     code = extract_longest_valid_code(text)
     tree = ast.parse(code)
-    
+
     definitions = {}
 
     imports = []
@@ -102,15 +106,15 @@ def sanitize(text: str, entrypoint: Optional[str] = None) -> str:
             imports.append(node)
         elif isinstance(node, ast.ClassDef):
             name = node.name
-            definitions[name] = ('class', node)
+            definitions[name] = ("class", node)
         elif isinstance(node, ast.FunctionDef):
             name = node.name
             if has_return_statement(node):
-                definitions[name] = ('function', node)
+                definitions[name] = ("function", node)
         elif isinstance(node, ast.Assign):
             name = get_definition_name(node)
             if name:
-                definitions[name] = ('variable', node)
+                definitions[name] = ("variable", node)
 
     if entrypoint:
         name2deps = get_deps([(name, node) for name, (_, node) in definitions.items()])

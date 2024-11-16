@@ -6,43 +6,41 @@ sys.path.extend([os.path.dirname(ROOT), os.path.dirname(os.path.dirname(ROOT))])
 
 from abc import ABC, abstractmethod
 
+
 class Benchmark(ABC):
 
     name: str = None
     path: str = None
 
-    general_stop_words = [  "<|endoftext|>",
-                            "<|endofmask|>",
-                            "</s>",
-                            "\nif __name__",
-                            "\ndef main(",
-                            "\nprint(",
-                            '\n```\n'
-                        ]
-    
-    completion_stop_words = [   "\ndef ",
-                                "\nclass ",
-                                "\nimport ",
-                                "\nfrom ",
-                                "\nassert "
-                            ]
-    
-    imports = [ "import math",
-                "import re",
-                "import sys",
-                "import copy",
-                "import datetime",
-                "import itertools",
-                "import collections",
-                "import heapq",
-                "import functools",
-                "import hashlib",
-                "import numpy",
-                "import numpy as np",
-                "import string",
-                "from typing import *",
-                "from collections import *"
-            ]
+    general_stop_words = [
+        "<|endoftext|>",
+        "<|endofmask|>",
+        "</s>",
+        "\nif __name__",
+        "\ndef main(",
+        "\nprint(",
+        "\n```\n",
+    ]
+
+    completion_stop_words = ["\ndef ", "\nclass ", "\nimport ", "\nfrom ", "\nassert "]
+
+    imports = [
+        "import math",
+        "import re",
+        "import sys",
+        "import copy",
+        "import datetime",
+        "import itertools",
+        "import collections",
+        "import heapq",
+        "import functools",
+        "import hashlib",
+        "import numpy",
+        "import numpy as np",
+        "import string",
+        "from typing import *",
+        "from collections import *",
+    ]
 
     def __init__(self):
         """
@@ -51,17 +49,13 @@ class Benchmark(ABC):
         :param requires_execution: bool
             wheter the task requires code execution during evaluation or not
         """
-        pass
 
     def fewshot_examples(self):
         """Loads and returns the few-shot examples for the task if they exist."""
-        pass
 
     @abstractmethod
     def get_task(self):
-        """Builds the task for the LM to generate from.
-        """
-        pass
+        """Builds the task for the LM to generate from."""
 
     @abstractmethod
     def get_prompt(self, doc):
@@ -69,15 +63,12 @@ class Benchmark(ABC):
         :param doc: dict[str: str]
             sample from the test dataset
         """
-        pass
-
 
     def get_reference(self, doc):
         """Builds the reference solution for the doc.
         :param doc: dict[str: str]
             sample from the test dataset
         """
-        pass
 
     @abstractmethod
     def postprocess_generation(self, task, generation):
@@ -87,7 +78,6 @@ class Benchmark(ABC):
         :param idx: int
             index of doc in the dataset to which the generation belongs
         """
-        pass
 
     @abstractmethod
     def process_results(self, generations, references):
@@ -99,7 +89,6 @@ class Benchmark(ABC):
             list of str containing refrences
         :return: dict[str: float]
         """
-        pass
 
     def _stop_at_stop_token(decoded_string, stop_tokens):
         """

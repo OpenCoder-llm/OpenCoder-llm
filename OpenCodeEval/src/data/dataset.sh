@@ -13,14 +13,14 @@ urls=(
 for url in "${urls[@]}"; do
     # 获取文件名
     filename=$(basename "$url")
-    
+
     # 删除已有的压缩文件和解压后的文件，确保不会重复
     [ -f "$filename" ] && rm "$filename"
     [ -f "${filename%.gz}" ] && rm "${filename%.gz}"
 
     echo "Downloading $url..."
     wget "$url"
-    
+
     echo "Unzipping $filename..."
     gunzip "$filename"
 done

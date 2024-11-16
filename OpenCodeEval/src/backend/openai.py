@@ -4,29 +4,26 @@ import sys
 ROOT = os.path.dirname(os.path.abspath(__file__))
 sys.path.extend([os.path.dirname(ROOT), os.path.dirname(os.path.dirname(ROOT))])
 
-import openai
-
-from tqdm import tqdm
 from typing import List
-from openai import OpenAI
+
+from backend.base import Generator
+from tqdm import tqdm
+from utils import make_chat_prompt, refine_text
 from vllm import LLM, SamplingParams
 
 
-from backend.base import Generator
-
-from utils import make_chat_prompt, refine_text
-
 class OpenaiGenerator(Generator):
-    def __init__(self,
-                 model_name: str,
-                 model_type: str = "Instruction",
-                 batch_size : int = 1,
-                 temperature : float = 0.0,
-                 max_tokens : int = 1024,
-                 eos: List[str] = None,
-                 num_gpus: int = 1,
-                 trust_remote_code: bool = True,
-                ) -> None:
+    def __init__(
+        self,
+        model_name: str,
+        model_type: str = "Instruction",
+        batch_size: int = 1,
+        temperature: float = 0.0,
+        max_tokens: int = 1024,
+        eos: List[str] = None,
+        num_gpus: int = 1,
+        trust_remote_code: bool = True,
+    ) -> None:
         super().__init__(model_name)
 
         print("Initializing a decoder model: {} ...".format(model_name))
@@ -37,13 +34,14 @@ class OpenaiGenerator(Generator):
         self.num_gpus = num_gpus
         self.trust_remote_code = trust_remote_code
         self.eos = eos
-        
 
-        self.model = LLM(model = self.model_name,
-                         max_model_len = 2048,
-                         tensor_parallel_size = self.num_gpus,
-                         trust_remote_code = self.trust_remote_code)
-        
+        self.model = LLM(
+            model=self.model_name,
+            max_model_len=2048,
+            tensor_parallel_size=self.num_gpus,
+            trust_remote_code=self.trust_remote_code,
+        )
+
         self.model.set_tokenizer(tokenizer=self.tokenizer)
 
     def is_chat(self) -> bool:
@@ -53,10 +51,7 @@ class OpenaiGenerator(Generator):
         else:
             return False
 
-    def generate(self, prompts: List[str],
-                 num_samples: int = 200,
-                 response_prefix: str = ""
-                ) -> List[str]:
+    def generate(self, prompts: List[str], num_samples: int = 200, response_prefix: str = "") -> List[str]:
 
         if self.is_chat():
             prompts = [make_chat_prompt(prompt, self.tokenizer, response_prefix) for prompt in prompts]
@@ -64,7 +59,10 @@ class OpenaiGenerator(Generator):
         sample_prompts = [prompt for prompt in prompts for _ in range(num_samples)]
 
         assert len(sample_prompts) == (len(prompts) * num_samples)
-        assert all(sample_prompts[i:i + num_samples] == [sample_prompts[i]] * num_samples for i in range(0, len(sample_prompts), num_samples))
+        assert all(
+            sample_prompts[i : i + num_samples] == [sample_prompts[i]] * num_samples
+            for i in range(0, len(sample_prompts), num_samples)
+        )
 
         generations = []
 
@@ -73,12 +71,12 @@ class OpenaiGenerator(Generator):
             batch_outputs = self.model.generate(
                 batch,
                 SamplingParams(
-                    temperature = self.temperature,
-                    max_tokens = 768,
-                    top_p = 1.0,
-                    stop = self.eos,
+                    temperature=self.temperature,
+                    max_tokens=768,
+                    top_p=1.0,
+                    stop=self.eos,
                 ),
-                use_tqdm = False,
+                use_tqdm=False,
             )
 
             batch_generations = []
@@ -92,7 +90,7 @@ class OpenaiGenerator(Generator):
 
             generations.extend(batch_generations)
 
-        grouped_generatuons = [generations[i:i + num_samples] for i in range(0, len(generations), num_samples)]
+        grouped_generatuons = [generations[i : i + num_samples] for i in range(0, len(generations), num_samples)]
         assert len(grouped_generatuons) == len(prompts)
         assert all(len(grouped_generatuons[i]) == num_samples for i in range(len(grouped_generatuons)))
 

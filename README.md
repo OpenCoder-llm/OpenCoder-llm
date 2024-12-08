@@ -45,7 +45,9 @@
 We are working hard to release all those resources! 💪 
 
 
-## Introduction
+## 1.Introduction
+
+---
 
 **OpenCoder** is an open and reproducible code LLM family which includes 1.5B and 8B base and chat models, supporting both English and Chinese languages. Starting from scratch, OpenCoder is pretrained on 2.5 trillion tokens composed of 90% raw code and 10% code-related web data, and supervised finetuned on over 4.5M high-quality SFT examples, finally reaching the performance of top-tier code LLMs. We provide not only model weights and inference code, but also the reproducible training data, the complete data processing pipeline, rigorous experimental ablation results, and detailed training protocols. Empowering researchers to build and innovate, OpenCoder is your open foundation for advancing code AI. 
 
@@ -55,7 +57,9 @@ We are working hard to release all those resources! 💪
 - **Exceptional Performance**: OpenCoder achieves high performance across multiple language model benchmarks, positioning it among the leading open-source models for code.
 
 
-## Models
+## 2. Models
+
+---
 
 <!-- |         Model         | Sequence Length |                                Download                                 |
 |:---------------------:|:---------------:|:-----------------------------------------------------------------------:|
@@ -72,7 +76,9 @@ We are working hard to release all those resources! 💪
 | OpenCoder-8B-Instruct  |      8K       | [🤗HuggingFace](https://huggingface.co/infly/OpenCoder-8B-Instruct) | [<img src="https://github.com/OpenCoder-llm/opencoder-llm.github.io/blob/main/static/images/wisemodel_logo.png?raw=true" height="12">](https://wisemodel.cn/models/OpenCoder/OpenCoder-8B-Instruct) |
 
 
-## Datasets
+## 3. Datasets
+
+---
 
 ### Pre-training
 |         Dataset       | Size |                                Download                                 |
@@ -92,11 +98,18 @@ We are working hard to release all those resources! 💪
 
 **This is not the end; we are organizing the remaining data and uploading it progressively.**
 
-## Performance
+## 4. Performance
+
+---
 <img src="https://github.com/user-attachments/assets/7f5a49b2-9539-4185-91fa-fd32c1315b2a" width="75%">
 <img src="https://github.com/user-attachments/assets/81c6e686-0ed0-4eb5-8fb8-a651750ec346" width="75%">
 
-## Get Started
+## 5. How to run on local
+
+---
+
+### 5.1 Inference with Huggingface's Transformers
+
 ```python
 import torch
 from transformers import AutoTokenizer, AutoModelForCausalLM
@@ -114,10 +127,80 @@ messages=[
 
 inputs = tokenizer.apply_chat_template(messages, add_generation_prompt=True, return_tensors="pt")
 
-outputs = model.generate(inputs, max_new_tokens=512, do_sample=False)
+outputs = model.generate(inputs, max_new_tokens=1024, do_sample=False)
 
 result = tokenizer.decode(outputs[0][len(inputs[0]):], skip_special_tokens=True)
 print(result)
+```
+### 5.2 Inference with SGLang
+You can use one of the two methods below to serve SGLang.
+
+**Method 1.** Manual Installation and Setup
+
+* Follow the instructions to [Install SGLang](https://sgl-project.github.io/start/install.html)
+
+* After installation, run the server with the following command:
+    ```shell
+    python3 -m sglang.launch_server \
+        --model infly/OpenCoder-8B-Instruct \
+        --tensor-parallel-size 1 \
+        --context-length 4096 \
+        --gpu-memory-utilization 0.9 \
+        --trust-remote-code \
+        --api-key opencoder
+    ```
+**Note:**
+If you encounter difficulties with the manual installation process, you can use the Docker method described below for easier setup.
+
+
+**Method 2.** Run with Docker
+
+```shell
+docker compose up -d -f docker-compose-sglang.yaml
+```
+
+### 5.3 Inference with vLLM
+You can use one of the two methods below to serve vLLM.
+
+**Method 1.** Manual Installation and Setup
+
+* Follow the instructions to 
+[Install vLLM](https://docs.vllm.ai/en/v0.4.2/getting_started/installation.html)
+
+* After installation, run the server with the following command:
+
+    ```shell
+    vllm serve \
+        --model infly/OpenCoder-8B-Instruct \
+        --max-model-len 4096 \
+        --tensor-parallel-size 1 \
+        --gpu-memory-utilization 0.8 \
+        --api-key opencoder
+    ```
+
+**Method 2.** Run with docker
+```shell
+docker compose up -d -f docker-compose-sglang.yaml
+```
+
+### OpenAI Compatible Usage
+
+After launching the server with SGLang or vLLM, you can query it with OpenAI API
+```python
+import openai
+client = openai.Client(
+    base_url="http://127.0.0.1:8000/v1", api_key="opencoder")
+
+# Chat completion
+response = client.chat.completions.create(
+    model="default",
+   messages=[
+    { 'role': 'user', 'content': "write a quick sort algorithm in python."}
+],
+    temperature=0,
+    max_tokens=1024,
+)
+print(response)
 ```
 
 ## Citation

@@ -1,0 +1,39 @@
+version: '3.8'
+services:
+  sglang:
+    image: lmsysorg/sglang:latest
+    container_name: sglang
+#    volumes:
+      # If you use modelscope, you need mount this directory
+      # - ${HOME}/.cache/modelscope:/root/.cache/modelscope
+    restart: always
+    #network_mode: host
+    # Or you can only publish port 8000
+    ports:
+      - "8000:8000"
+    environment:
+      HF_TOKEN: <secret>
+      # if you use modelscope to download model, you need set this environment
+      # - SGLANG_USE_MODELSCOPE: true
+    entrypoint: python3 -m sglang.launch_server
+    command:
+      --model-path  infly/OpenCoder-8B-Instruct
+      --host 0.0.0.0
+      --port 8000
+      --mem-fraction-static 0.8
+      --context-length 4096
+      --tensor-parallel-size 1 
+      --api-key opencoder
+    ulimits:
+      memlock: -1
+      stack: 67108864
+    ipc: host
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8000/health || exit 1"]
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              device_ids: ['0']
+              capabilities: [gpu]

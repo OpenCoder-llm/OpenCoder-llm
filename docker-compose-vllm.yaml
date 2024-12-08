@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  vllm_service:
+    image: vllm/vllm-openai:latest
+    container_name: vllm
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              device_ids: ['0']
+              capabilities: [gpu]
+#    volumes:
+#      - /mnt/data/huggingface:/root/.cache/huggingface
+    restart: always
+    #network_mode: host
+    # Or you can only publish port 30000
+    ports:
+      - "8000:8000"
+    environment:
+      HF_TOKEN: <secret>
+    command:
+      --model infly/OpenCoder-8B-Instruct
+      --host 0.0.0.0
+      --port 8000
+      --enable-auto-tool-choice
+      --max-model-len 4096
+      --tensor-parallel-size 1
+      --pipeline-parallel-size 1
+      --gpu-memory-utilization 0.8
+      --api-key opencoder
+#    ulimit67108864
+    ipc: host
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8000/health || exit 1"]
